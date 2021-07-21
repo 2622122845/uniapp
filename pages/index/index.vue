@@ -2,14 +2,14 @@
 	<view class="uni-wrap">
 		<scroll-view scroll-y="true" style="">
 			<!-- 滚动通知   -->
-			<u-notice-bar class='notice-bar' mode="vertical" :list="notice"></u-notice-bar>
+			<u-notice-bar class='notice-bar' mode="vertical" :list="data.notice"></u-notice-bar>
 			<!-- 轮播图 -->
 			<view class="wrap">
-				<u-swiper :list="swiperItem" mode='number' indicator-pos='topRight' effect3d title>
+				<u-swiper :list="data.swiperItem" mode='number' indicator-pos='topRight' effect3d title>
 				</u-swiper>
 			</view>
 			<!-- 宫格布局 -->
-			<u-grid :col="3" :border='showGridBorder'>
+			<u-grid :col="3" :border='config.showGridBorder'>
 				<u-grid-item>
 					<u-icon name="photo" :size="46"></u-icon>
 					<view class="grid-text">图片</view>
@@ -26,55 +26,51 @@
 			<!-- 线条 -->
 			<u-line color="#eee" />
 			<!-- 卡片 -->
-			<u-card v-for="(item,index) in card" :key='index' :title="cardS.title" :sub-title="cardS.subTitle">
-				<view class="" slot="body">
+			<u-card v-for="(item,index) in data.card" :key='index' :title="item.title" :sub-title="item.subTitle">
+				<view slot="body" v-for="i in item.children">
 					<view class="u-body-item u-flex u-border-bottom u-col-between u-p-t-0">
-						<view class="u-body-item-title u-line-2">瓶身描绘的牡丹一如你初妆，冉冉檀香透过窗心事我了然，宣纸上走笔至此搁一半</view>
-						<image src="../../static/logo.png" mode="aspectFill"></image>
-					</view>
-					<view class="u-body-item u-flex u-row-between u-p-b-0">
-						<view class="u-body-item-title u-line-2">釉色渲染仕女图韵味被私藏，而你嫣然的一笑如含苞待放</view>
-						<image src="../../static/logo.png" mode="aspectFill"></image>
+						<view class="u-body-item-title u-line-2">{{i.txt}}</view>
+						<image :src="i.image" mode="aspectFill"></image>
 					</view>
 				</view>
 				<view class="card_foot" slot="foot">
 					<view v-on:click="log(item.path)" class="more">查看更多</view>
 				</view>
 			</u-card>
-			<u-back-top :scroll-top="scrollTop"></u-back-top>
+			<u-back-top :scroll-top="data.scrollTop"></u-back-top>
 		</scroll-view>
 	</view>
 </template>
 <script>
 	//import MyPopup from '../../components/MyPopup.vue'
+	//storage/emulated/0/Pictures/testApp/
 	export default {
+		onLoad() {
+			const self = this;
+			plus.io.requestFileSystem(plus.io.PRIVATE_DOC, function(fobject) {
+				fobject.root.getFile('/storage/emulated/0/Pictures/testApp/t.json', {
+					create: true
+				}, function(fileEntry) {
+					fileEntry.file(function(file) {
+						var fileReader = new plus.io.FileReader();
+						fileReader.readAsText(file, 'utf-8');
+						fileReader.onloadend = function(evt) {
+							for (let key in JSON.parse(evt.target.result)) {
+								self.$set(self.data, key,JSON.parse(evt.target.result)[key]);
+								console.log(key)
+							}
+						}
+					});
+				});
+			});
+		},
 		data() {
 			return {
-				cardS: {
-					title: '素胚勾勒出青花，笔锋浓转淡',
-					subTitle: '2020-05-15',
-				},
-				card: [{
-					path: '/pages/classifyDetail/classifyDetail'
-				}, {
-					path: '/pages/classifyDetail/classifyDetail'
-				}],
-				scrollTop: 0,
-				showGridBorder: false,
-				notice: ['微信号：qq2622122845', 'QQ：2622122845'],
-				swiperItem: [{
-					image: '../../static/rectangle/A.jpg',
-					title: 'a'
-				}, {
-					image: '../../static/rectangle/B.png',
-					title: 'b'
-				}, {
-					image: '../../static/rectangle/C.jpg',
-					title: 'c'
-				}, {
-					image: '../../static/rectangle/D.jpg',
-					title: 'd'
-				}]
+				data: {},
+				config: {
+					scrollTop: 0,
+					showGridBorder: false
+				}
 			}
 		},
 		methods: {
@@ -82,7 +78,7 @@
 				true;
 			},
 			onPageScroll(e) {
-				this.scrollTop = e.scrollTop;
+				this.config.scrollTop = e.scrollTop;
 			},
 			createIamge(src) {
 				let img = document.createElement('img')
@@ -94,20 +90,9 @@
 				uni.navigateTo({
 					url: path
 				});
-				/*let moreAll=document.querySelectorAll('.more')
-				moreAll.forEach((t,i)=>{
-					t.addEventListener('click',function(){
-						uni.navigateTo({
-						    url: '/pages/test/test?12=1'
-						});
-						console.log(1)
-					})
-				})*/
 			}
 		},
-		components: {
-			//MyPopup
-		}
+		components: {}
 	}
 </script>
 <style scoped>

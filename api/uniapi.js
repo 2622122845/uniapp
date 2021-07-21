@@ -19,3 +19,13 @@
 		"selectedIconPath": "static/login-logo.png",
 		"text": "测试"
 	}
+{
+	uni.getSavedFileInfo({
+	  filePath: '/storage/emulated/0/test/1.txt', //仅做示例用，非真正的文件路径
+	  success: function (res) {
+	    console.log(res.size);
+	    console.log(res.createTime);
+		console.log(res.errMsg,plus.device.model)
+	  }
+	});
+}
